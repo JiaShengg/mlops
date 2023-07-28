@@ -1,17 +1,16 @@
-name: CI/CD for the web app (API + frontend)
+name: CI/CD for the ml-pipeline that builds all the pipeline modules and pushes them to the private PyPI registry. From where Airflow will install the latest versions and use them in the next run.
 
 on:
   push:
     paths-ignore:
-      - 'batch-prediction-pipeline/'
-      - 'feature-pipeline/'
-      - 'training-pipeline'
+      - 'app-api/'
+      - 'app-frontend/'
       - '**/*.yml'
       - '**/*.md'
     branches: [ "main" ]
-    
+
 env:
-  INSTANCE_IP: '${{ vars.APP_INSTANCE_IP }}'
+  INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
   INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
 
 jobs:
@@ -20,7 +19,7 @@ jobs:
     steps:
       - uses: 'actions/checkout@v3'
 
-      - name: 'SSH into EC2 instance and deploy the web app'
+      - name: 'SSH into EC2 instance and execute deployment script'
         uses: 'appleboy/ssh-action@master'
         with:
           host: ${{ env.INSTANCE_IP }}
@@ -31,5 +30,5 @@ jobs:
             ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ env.INSTANCE_USER }}@${{ env.INSTANCE_IP }} 'bash -s' << EOF
               cd ~/energy-forecasting
               git pull
-              docker-compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
+              sh deploy/ml-pipeline.sh
             EOF
