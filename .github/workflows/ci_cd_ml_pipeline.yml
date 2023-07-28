@@ -22,7 +22,8 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i <(echo "$SSH_PRIVATE_KEY") ${INSTANCE_USER}@${INSTANCE_IP} '
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${INSTANCE_USER}@${INSTANCE_IP} '
             cd ~/energy-forecasting
             git pull
             sh deploy/ml-pipeline.sh
