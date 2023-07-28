@@ -1,10 +1,11 @@
-name: CI/CD for the ml-pipeline that builds all the pipeline modules and pushes them to the private PyPI registry. From where Airflow will install the latest versions and use them in the next run.
+name: CI/CD for the web app (API + frontend)
 
 on:
   push:
     paths-ignore:
-      - 'app-api/'
-      - 'app-frontend/'
+      - 'batch-prediction-pipeline/'
+      - 'feature-pipeline/'
+      - 'training-pipeline'
       - '**/*.yml'
       - '**/*.md'
     branches: [ "main" ]
@@ -24,7 +25,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${INSTANCE_USER}@${INSTANCE_IP} '
-            cd ~/energy-forecasting
-            git pull
-            sh deploy/ml-pipeline.sh
+            cd ~/energy-forecasting && 
+            git pull && 
+            docker compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
           '
