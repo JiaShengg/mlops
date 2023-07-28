@@ -19,18 +19,20 @@ jobs:
     steps:
       - uses: 'actions/checkout@v3'
 
+      - name: 'Configure AWS credentials'
+        run: |
+          echo "[default]" >> $HOME/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $HOME/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
+          echo "default_region_name=${{ secrets.AWS_DEFAULT_REGION }}" >> $HOME/.aws/credentials
+
       - name: 'SSH into EC2 instance and execute deployment script'
         uses: 'appleboy/ssh-action@master'
         with:
-          HOSTNAME: ${{ env.INSTANCE_IP }}
-          USER_NAME: ${{ env.INSTANCE_USER }}
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-
+          host: ${{ env.INSTANCE_IP }}
+          username: ${{ env.INSTANCE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
             cd ~/energy-forecasting
             git pull
             sh deploy/ml-pipeline.sh
-          '

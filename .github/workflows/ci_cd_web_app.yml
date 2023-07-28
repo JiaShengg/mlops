@@ -25,10 +25,10 @@ jobs:
           HOSTNAME: ${{ env.INSTANCE_IP }}
           USER_NAME: ${{ env.INSTANCE_USER }}
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-            cd ~/energy-forecasting
-            git pull
-            sh deploy/ml-pipeline.sh
-          EOF
+          script: |
+            echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+              cd ~/energy-forecasting
+              git pull
+              sh deploy/ml-pipeline.sh
+            '
