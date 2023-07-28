@@ -18,14 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: 'actions/checkout@v3'
-
       - name: 'SSH into EC2 instance and execute deployment script'
-        uses: 'appleboy/ssh-action@master'
-        with:
-          host: ${{ env.INSTANCE_IP }}
-          username: ${{ env.INSTANCE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+        env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{env.INSTANCE_IP}}
+            USER_NAME: ${env.INSTANCE_USER}
+
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+
             cd ~/energy-forecasting
             git pull
             sh deploy/ml-pipeline.sh

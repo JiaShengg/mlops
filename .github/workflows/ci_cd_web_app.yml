@@ -28,7 +28,8 @@ jobs:
           script: |
             |
             ssh -o StrictHostKeyChecking=no -i <<< "${PRIVATE_KEY}" ${USER_NAME}@${HOSTNAME} '
-              cd ~/energy-forecasting
-              git pull
-              sh deploy/ml-pipeline.sh
-            '
+            
+              cd ~/energy-forecasting && 
+              git pull && 
+              docker compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
+              '
