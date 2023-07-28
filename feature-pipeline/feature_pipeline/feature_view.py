@@ -32,7 +32,6 @@ def create(
             datetime of the training dataset that will be created.
               If None is provided, it will try to load it
             from the cached feature_pipeline_metadata.json file.
-
     Returns:
         dict: The feature group version.
 
