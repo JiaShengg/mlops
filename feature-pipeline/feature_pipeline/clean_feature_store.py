@@ -3,6 +3,9 @@ import hopsworks
 
 from feature_pipeline import settings
 
+"""
+test github action
+"""
 def clean():
     """
     Utiliy function used during development to clean all the data from the feature store.
