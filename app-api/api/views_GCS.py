@@ -1,21 +1,17 @@
-import pandas as pd
+import gcsfs
 from typing import Any, List
 
-import boto3
-from io import BytesIO
+import pandas as pd
 from fastapi import APIRouter, HTTPException
 
 from api import schemas
 from api.config import get_settings
 
-# Create an S3 client using AWS credentials
-aws_access_key_id = str(get_settings().AWS_ACCESS_KEY_ID)
-aws_secret_access_key = str(get_settings().AWS_SECRET_ACCESS_KEY)
-aws_region = str(get_settings().AWS_DEFAULT_REGION
+
+fs = gcsfs.GCSFileSystem(
+    project=get_settings().GCP_PROJECT,
+    token=get_settings().GCP_SERVICE_ACCOUNT_JSON_PATH,
 )
-
-
-s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=aws_region)
 
 api_router = APIRouter()
 
@@ -25,6 +21,7 @@ def health() -> dict:
     """
     Health check endpoint.
     """
+
     health_data = schemas.Health(
         name=get_settings().PROJECT_NAME, api_version=get_settings().VERSION
     )
@@ -40,12 +37,8 @@ def consumer_type_values() -> List:
     Retrieve unique consumer types.
     """
 
-    # Download the data from S3
-    bucket_name = get_settings().AWS_BUCKET 
-    blob_name = "X.parquet"
-    response = s3_client.get_object(Bucket=bucket_name, Key=blob_name)
-    data = response['Body'].read()
-    X = pd.read_parquet(BytesIO(data))
+    # Download the data from GCS.
+    X = pd.read_parquet(f"{get_settings().GCP_BUCKET}/X.parquet", filesystem=fs)
 
     unique_consumer_type = list(X.index.unique(level="consumer_type"))
 
@@ -58,12 +51,8 @@ def area_values() -> List:
     Retrieve unique areas.
     """
 
-    # Download the data from AWS.
-    bucket_name = get_settings().AWS_BUCKET 
-    blob_name = "X.parquet"
-    response = s3_client.get_object(Bucket=bucket_name, Key=blob_name)
-    data = response['Body'].read()
-    X = pd.read_parquet(BytesIO(data))
+    # Download the data from GCS.
+    X = pd.read_parquet(f"{get_settings().GCP_BUCKET}/X.parquet", filesystem=fs)
 
     unique_area = list(X.index.unique(level="area"))
 
@@ -80,20 +69,11 @@ async def get_predictions(area: int, consumer_type: int) -> Any:
     Get forecasted predictions based on the given area and consumer type.
     """
 
-    # Download the data from S3
-    bucket_name = get_settings().AWS_BUCKET
-
-    # Read train_df and preds_df from S3
-    train_blob_name = "y.parquet"
-    preds_blob_name = "predictions.parquet"
-    train_response = s3_client.get_object(Bucket=bucket_name, Key=train_blob_name)
-    preds_response = s3_client.get_object(Bucket=bucket_name, Key=preds_blob_name)
-
-    # Convert the S3 object contents to DataFrames
-    train_data = train_response['Body'].read()
-    preds_data = preds_response['Body'].read()
-    train_df = pd.read_parquet(BytesIO(train_data))
-    preds_df = pd.read_parquet(BytesIO(preds_data))
+    # Download the data from GCS.
+    train_df = pd.read_parquet(f"{get_settings().GCP_BUCKET}/y.parquet", filesystem=fs)
+    preds_df = pd.read_parquet(
+        f"{get_settings().GCP_BUCKET}/predictions.parquet", filesystem=fs
+    )
 
     # Query the data for the given area and consumer type.
     try:
@@ -141,17 +121,13 @@ async def get_metrics() -> Any:
     Get monitoring metrics.
     """
 
-    # Download the data from S3
-    bucket_name = get_settings().AWS_BUCKET
-    metrics_blob_name = "metrics_monitoring.parquet"
-    metrics_response = s3_client.get_object(Bucket=bucket_name, Key=metrics_blob_name)
+    # Download the data from GCS.
+    metrics = pd.read_parquet(
+        f"{get_settings().GCP_BUCKET}/metrics_monitoring.parquet", filesystem=fs
+    )
 
-    # Convert the S3 object contents to a DataFrame
-    metrics_data = metrics_response['Body'].read()
-    metrics_df = pd.read_parquet(BytesIO(metrics_data))
-
-    datetime_utc = metrics_df.index.to_list()
-    mape = metrics_df["MAPE"].to_list()
+    datetime_utc = metrics.index.to_list()
+    mape = metrics["MAPE"].to_list()
 
     return {
         "datetime_utc": datetime_utc,
@@ -169,18 +145,13 @@ async def get_predictions(area: int, consumer_type: int) -> Any:
     Get forecasted predictions based on the given area and consumer type.
     """
 
-    # Download the data from S3
-    bucket_name = get_settings().AWS_BUCKET
-    y_monitoring_blob_name = "y_monitoring.parquet"
-    predictions_monitoring_blob_name = "predictions_monitoring.parquet"
-    y_monitoring_response = s3_client.get_object(Bucket=bucket_name, Key=y_monitoring_blob_name)
-    predictions_monitoring_response = s3_client.get_object(Bucket=bucket_name, Key=predictions_monitoring_blob_name)
-
-    # Convert the S3 object contents to DataFrames
-    y_monitoring_data = y_monitoring_response['Body'].read()
-    predictions_monitoring_data = predictions_monitoring_response['Body'].read()
-    y_monitoring = pd.read_parquet(BytesIO(y_monitoring_data))
-    predictions_monitoring = pd.read_parquet(BytesIO(predictions_monitoring_data))
+    # Download the data from GCS.
+    y_monitoring = pd.read_parquet(
+        f"{get_settings().GCP_BUCKET}/y_monitoring.parquet", filesystem=fs
+    )
+    predictions_monitoring = pd.read_parquet(
+        f"{get_settings().GCP_BUCKET}/predictions_monitoring.parquet", filesystem=fs
+    )
 
     # Query the data for the given area and consumer type.
     try:

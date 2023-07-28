@@ -36,14 +36,18 @@ class Settings(BaseSettings):
     # - Quantity of workers for uvicorn.
     WORKERS_COUNT: int = 1
     # - Enable uvicorn reloading.
-    RELOAD: bool = False
+    RELOAD: bool = True
 
     PROJECT_NAME: str = "Energy Consumption API"
 
     # Google Cloud Platform credentials
-    GCP_PROJECT: Optional[str] = None
-    GCP_BUCKET: Optional[str] = None
-    GCP_SERVICE_ACCOUNT_JSON_PATH: Optional[str] = None
+    # GCP_PROJECT: Optional[str] = None
+    # GCP_BUCKET: Optional[str] = None
+    # GCP_SERVICE_ACCOUNT_JSON_PATH: Optional[str] = None
+    AWS_BUCKET: str = None
+    AWS_ACCESS_KEY_ID: str = None
+    AWS_SECRET_ACCESS_KEY: str = None
+    AWS_DEFAULT_REGION: str = None
 
     class Config:
         env_file = ".env"

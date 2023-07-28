@@ -135,10 +135,10 @@ def forecast(model, X: pd.DataFrame, fh: int = 24):
         [all_areas, all_consumer_types, fh_range],
         names=["area", "consumer_type", "datetime_utc"],
     )
+
     X_forecast = pd.DataFrame(index=index)
     X_forecast["area_exog"] = X_forecast.index.get_level_values(0)
     X_forecast["consumer_type_exog"] = X_forecast.index.get_level_values(1)
-
     predictions = model.predict(X=X_forecast)
 
     return predictions
@@ -148,7 +148,7 @@ def save(X: pd.DataFrame, y: pd.DataFrame, predictions: pd.DataFrame):
     """Save the input data, target data, and predictions to GCS."""
 
     # Get the bucket object from the GCS client.
-    bucket = utils.get_bucket()
+    bucket_name = utils.get_bucket()
 
     # Save the input data and target data to the bucket.
     for df, blob_name in zip(
@@ -156,8 +156,8 @@ def save(X: pd.DataFrame, y: pd.DataFrame, predictions: pd.DataFrame):
     ):
         logger.info(f"Saving {blob_name} to bucket...")
         utils.write_blob_to(
-            bucket=bucket,
-            blob_name=blob_name,
+            bucket_name=bucket_name,
+            blob_name=str(blob_name),
             data=df,
         )
         logger.info(f"Successfully saved {blob_name} to bucket.")
@@ -176,12 +176,13 @@ def save_for_monitoring(predictions: pd.DataFrame, start_datetime: datetime):
     - datetime_utc: The timestamp of the predictions, e.g. "2020-01-01 00:00:00" with a frequency of 1 hour.
     """
 
-    bucket = utils.get_bucket()
+    bucket_name = utils.get_bucket()
 
     cached_predictions = utils.read_blob_from(
-        bucket=bucket, blob_name=f"predictions_monitoring.parquet"
+        bucket_name=bucket_name, blob_name=f"predictions_monitoring.parquet"
     )
     has_cached_predictions = cached_predictions is not None
+
     if has_cached_predictions is True:
         # Merge predictions with cached predictions.
         cached_predictions.index = cached_predictions.index.set_levels(
@@ -214,12 +215,11 @@ def save_for_monitoring(predictions: pd.DataFrame, start_datetime: datetime):
     predictions = predictions.dropna(subset=["energy_consumption"])
 
     utils.write_blob_to(
-        bucket=bucket,
+        bucket_name=bucket_name,
         blob_name=f"predictions_monitoring.parquet",
         data=predictions,
     )
     logger.info(f"Successfully cached predictions forecasted before {start_datetime}.")
-
 
 if __name__ == "__main__":
     predict()

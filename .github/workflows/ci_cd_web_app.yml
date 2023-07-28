@@ -11,10 +11,10 @@ on:
     branches: [ "main" ]
     
 env:
-  CLOUDSDK_CORE_PROJECT: '${{ vars.CLOUDSDK_CORE_PROJECT }}'
-  USER: '${{ vars.USER }}'
-  INSTANCE_NAME: '${{ vars.APP_INSTANCE_NAME }}'
-  ZONE: '${{ vars.ZONE }}'
+  AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+  AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+  INSTANCE_IP: '${{ secrets.INSTANCE_IP }}'
+  INSTANCE_USER: '${{ secrets.INSTANCE_USER }}'
 
 jobs:
   ci_cd:
@@ -22,19 +22,19 @@ jobs:
     steps:
       - uses: 'actions/checkout@v3'
 
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+      - name: 'Configure AWS credentials'
+        run: |
+          echo "[default]" >> $HOME/.aws/credentials
+          echo "aws_access_key_id=${{ env.AWS_ACCESS_KEY_ID }}" >> $HOME/.aws/credentials
+          echo "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
+          
+      - name: 'SSH into EC2 instance and deploy the web app'
+        uses: 'appleboy/ssh-action@master'
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-      - id: 'compute-ssh'
-        uses: 'google-github-actions/ssh-compute@v0'
-        with:
-          project_id: '${{ env.CLOUDSDK_CORE_PROJECT }}'
-          user: '${{ env.USER }}'
-          instance_name: '${{ env.INSTANCE_NAME }}'
-          zone: '${{ env.ZONE }}'
-          ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
-          command: >
-            cd ~/energy-forecasting && 
-            git pull && 
-            docker compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
+          host: ${{ env.INSTANCE_IP }}
+          username: ${{ env.INSTANCE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/energy-forecasting
+            git pull
+            docker-compose -f deploy/app-docker-compose.yml --project-directory . up --build -d

@@ -2203,7 +2203,6 @@ javaobj-py3 = "*"
 pyasn1 = ">=0.3.5"
 pyasn1-modules = "*"
 pycryptodomex = "*"
-twofish = "*"
 
 [[package]]
 name = "PyMySQL"
@@ -3013,17 +3012,6 @@ files = [
 [package.extras]
 docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["argcomplete (>=2.0)", "pre-commit", "pytest", "pytest-mock"]
-
-[[package]]
-name = "twofish"
-version = "0.3.0"
-description = "Bindings for the Twofish implementation by Niels Ferguson"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "twofish-0.3.0.tar.gz", hash = "sha256:b09d8bb50d33b23ff34cafb1f9209f858f752935c6a5c901efb92a41acb830fa"},
-]
 
 [[package]]
 name = "typing-extensions"

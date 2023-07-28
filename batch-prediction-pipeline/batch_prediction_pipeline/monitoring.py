@@ -26,9 +26,9 @@ def compute(feature_view_version: Optional[int] = None) -> None:
         feature_view_version = feature_view_metadata["feature_view_version"]
 
     logger.info("Loading old predictions...")
-    bucket = utils.get_bucket()
+    bucket_name = utils.get_bucket()
     predictions = utils.read_blob_from(
-        bucket=bucket, blob_name=f"predictions_monitoring.parquet"
+        bucket_name=bucket_name, blob_name=f"predictions_monitoring.parquet"
     )
     if predictions is None or len(predictions) == 0:
         logger.info(
@@ -36,6 +36,7 @@ def compute(feature_view_version: Optional[int] = None) -> None:
         )
 
         return
+    
     predictions.index = predictions.index.set_levels(
         pd.to_datetime(predictions.index.levels[2], unit="h").to_period("H"), level=2
     )
@@ -106,7 +107,7 @@ def compute(feature_view_version: Optional[int] = None) -> None:
 
     logger.info("Saving new metrics...")
     utils.write_blob_to(
-        bucket=bucket,
+        bucket_name=bucket_name,
         blob_name=f"metrics_monitoring.parquet",
         data=metrics,
     )
@@ -114,7 +115,7 @@ def compute(feature_view_version: Optional[int] = None) -> None:
         columns={"energy_consumption_observations": "energy_consumption"}
     )
     utils.write_blob_to(
-        bucket=bucket,
+        bucket_name=bucket_name,
         blob_name=f"y_monitoring.parquet",
         data=latest_observations[["energy_consumption"]],
     )

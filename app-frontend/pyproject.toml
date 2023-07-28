@@ -10,7 +10,7 @@ packages = [{include = "frontend"}]
 python = ">3.9.7,<3.10"
 streamlit = ">=1.20.0,<1.21.0"
 plotly = ">=5.14.1,<5.15.0"
-yarl = "^1.8.2"
+yarl = "^1.9.2"
 
 
 [build-system]
