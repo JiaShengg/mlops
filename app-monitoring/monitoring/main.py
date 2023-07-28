@@ -40,3 +40,8 @@ consumer_type = st.selectbox(
 # Check if both area and consumer type have values listed, then create plot for data.
 if area and consumer_type:
     st.plotly_chart(build_data_plot(area, consumer_type))
+
+
+""""
+testing github action
+"""
