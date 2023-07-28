@@ -20,14 +20,6 @@ jobs:
     steps:
       - uses: 'actions/checkout@v3'
 
-      - name: 'Configure AWS credentials'
-        run: |
-          echo "[default]" >> $HOME/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $HOME/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
-          echo "default_region_name=${{ secrets.AWS_DEFAULT_REGION }}" >> $HOME/.aws/credentials
-
-          
       - name: 'SSH into EC2 instance and deploy the web app'
         uses: 'appleboy/ssh-action@master'
         with:
@@ -35,6 +27,9 @@ jobs:
           username: ${{ env.INSTANCE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/energy-forecasting
-            git pull
-            docker-compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
+            ssh-keyscan -H ${{ env.INSTANCE_IP }} >> ~/.ssh/known_hosts
+            ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ env.INSTANCE_USER }}@${{ env.INSTANCE_IP }} 'bash -s' << EOF
+              cd ~/energy-forecasting
+              git pull
+              docker-compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
+            EOF
