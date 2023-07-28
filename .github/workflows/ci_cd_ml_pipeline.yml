@@ -10,10 +10,8 @@ on:
     branches: [ "main" ]
     
 env:
-  AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
-  AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
-  ML_PIPELINE_INSTANCE_IP: '${{ secrets.INSTANCE_IP }}'
-  INSTANCE_USER: '${{ secrets.INSTANCE_USER }}'
+  INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
+  INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
 
 jobs:
   ci_cd:
@@ -24,9 +22,10 @@ jobs:
       - name: 'Configure AWS credentials'
         run: |
           echo "[default]" >> $HOME/.aws/credentials
-          echo "aws_access_key_id=${{ env.AWS_ACCESS_KEY_ID }}" >> $HOME/.aws/credentials
-          echo "aws_secret_access_key=${{ env.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
-          
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $HOME/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
+          echo "default_region_name=${{ secrets.AWS_DEFAULT_REGION }}" >> $HOME/.aws/credentials
+
       - name: 'SSH into EC2 instance and execute deployment script'
         uses: 'appleboy/ssh-action@master'
         with:
