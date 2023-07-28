@@ -9,9 +9,7 @@ def clean():
     Utiliy function used during development to clean all the data from the feature store.
     """
 
-    """"
-    testing github action
-    """
+    
 
     project = hopsworks.login(
         api_key_value=settings.SETTINGS["FS_API_KEY"], project=settings.SETTINGS["FS_PROJECT_NAME"]

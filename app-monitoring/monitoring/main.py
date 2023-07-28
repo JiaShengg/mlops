@@ -42,6 +42,3 @@ if area and consumer_type:
     st.plotly_chart(build_data_plot(area, consumer_type))
 
 
-""""
-testing github action
-"""
