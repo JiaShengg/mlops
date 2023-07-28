@@ -26,10 +26,8 @@ jobs:
           username: ${{ env.INSTANCE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            |
-            ssh -o StrictHostKeyChecking=no -i <<< "${PRIVATE_KEY}" ${USER_NAME}@${HOSTNAME} '
-            
-              cd ~/energy-forecasting && 
-              git pull && 
-              docker compose -f deploy/app-docker-compose.yml --project-directory . up --build -d
-              '
+            ssh -o StrictHostKeyChecking=no -i <<< "${PRIVATE_KEY}" ${USER_NAME}@${HOSTNAME} << EOF
+              cd ~/energy-forecasting
+              git pull
+              sh deploy/ml-pipeline.sh
+            EOF
