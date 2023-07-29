@@ -13,10 +13,8 @@ jobs:
       - uses: actions/checkout@v2 
       - name: Build & Deploy
         env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           HOSTNAME: ${{ vars.ML_PIPELINE_INSTANCE_IP }}
           USER_NAME: ${{ vars.INSTANCE_USER }}
       
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i ${USER_NAME}@${HOSTNAME} "touch github.txt"
