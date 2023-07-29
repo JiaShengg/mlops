@@ -1,39 +1,33 @@
-name: SSH into EC2 Instance
 
-on:
-  push:
-    branches:
-      - main
+This is my github actions flow:
 
-jobs:
-  ssh-into-ec2:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout Repository
+  ---
+  name: build and push image to aws ecr
+  on:
+    push: 
+      branches: [ main ]
+  jobs:
+    build-and-push:
+      name: Build and push to ecr
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Install SSH Client
-        run: |
-          choco install -y openssh
-
-      - name: Create SSH Directory
-        run: |
-          mkdir C:\Users\runner\.ssh
-
-      - name: Copy .pem File
-        run: |
-          Copy-Item -Path "C:\\secrets\\github.pem" -Destination "C:\\Users\\runner\\.ssh\\github.pem"
-          icacls "C:\\Users\\runner\\.ssh\\github.pem" /inheritance:r
-          icacls "C:\\Users\\runner\\.ssh\\github.pem" /grant:r "NT AUTHORITY\\SYSTEM:(F)"
-          icacls "C:\\Users\\runner\\.ssh\\github.pem" /grant:r "BUILTIN\\Administrators:(F)"
-          icacls "C:\\Users\\runner\\.ssh\\github.pem" /grant:r "BUILTIN\\Users:(R)"
-          icacls "C:\\Users\\runner\\.ssh\\github.pem" /grant:r "BUILTIN\\Users:(F)"
-          attrib +R "C:\\Users\\runner\\.ssh\\github.pem"
-
-      - name: SSH into EC2 Instance
-        env:
-          INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
-          INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
-        run: |
-          ssh -o StrictHostKeyChecking=no -i "C:\\Users\\runner\\.ssh\\github.pem" ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
+      ...
+  
+    deploy:
+      needs: build-and-push
+      name: deploy
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Login ec2
+          env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{ secrets.ML_PIPELINE_INSTANCE_IP }}
+            USER_NAME: ${{ secrets.INSTANCE_USER }}
+          run: |
+            echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
+            ls
+            touch helloworld.txt
