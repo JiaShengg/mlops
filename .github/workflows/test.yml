@@ -14,8 +14,8 @@ jobs:
       - name: Build & Deploy
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          HOSTNAME: ${{ secrets.ML_PIPELINE_INSTANCE_IP }}
-          USER_NAME: ${{ secrets.INSTANCE_USER }}
+          HOSTNAME: ${{ vars.ML_PIPELINE_INSTANCE_IP }}
+          USER_NAME: ${{ vars.INSTANCE_USER }}
       
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
