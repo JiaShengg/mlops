@@ -16,9 +16,12 @@ jobs:
       - name: Install SSH Client
         run: sudo apt-get install -y openssh-client
 
-      - name: Copy .pem File
-        run: cp C:/Users/Jia Sheng/github.pem ~/.ssh/github.pem && chmod 600 ~/.ssh/github.pem
+      - name: Create SSH Directory
+        run: mkdir -p ~/.ssh
 
+      - name: Copy .pem File
+        run: cp C:/Users/Jia_Sheng/aws/github.pem ~/.ssh/github.pem && chmod 600 ~/.ssh/github.pem
+        
       - name: SSH into EC2 Instance
         env:
           INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
