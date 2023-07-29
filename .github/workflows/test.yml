@@ -17,4 +17,4 @@ jobs:
           USER_NAME: ${{ vars.INSTANCE_USER }}
       
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${USER_NAME}@${HOSTNAME} "touch github.txt"
+          ssh -o StrictHostKeyChecking=no -i ${USER_NAME}@${HOSTNAME}
