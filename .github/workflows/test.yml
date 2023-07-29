@@ -1,21 +1,21 @@
 name: build and push image to aws ecr
+
 on:
-  push: 
-    branches: [ main ]
+  push:
+    branches: [main]
+
 jobs:
   build-and-push:
-    name: Build and push to ecr
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    # ... (your build and push steps here)
 
   deploy:
     needs: build-and-push
-    name: deploy
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Login ec2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -23,6 +23,5 @@ jobs:
           USER_NAME: ${{ secrets.INSTANCE_USER }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
-          ls
-          touch helloworld.txt
+          # SSH into the EC2 instance and create the 'github.txt' file
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "touch github.txt"
