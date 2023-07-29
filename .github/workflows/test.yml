@@ -20,7 +20,7 @@ jobs:
         run: mkdir -p ~/.ssh
 
       - name: Copy .pem File
-        run: cp C:/Users/Jia_Sheng/aws/github.pem ~/.ssh/github.pem && chmod 600 ~/.ssh/github.pem
+        run: cp C:\Users\Jia Sheng\aws\github.pem ~/.ssh/github.pem && chmod 600 ~/.ssh/github.pem
         
       - name: SSH into EC2 Instance
         env:
