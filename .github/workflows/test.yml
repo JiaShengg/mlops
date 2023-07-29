@@ -1,22 +1,27 @@
-name: Deploy
+name: SSH into EC2 Instance
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  Deploy:
-    name: Deploy to EC2
+  ssh-into-ec2:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v2 
-      - name: Build & Deploy
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install SSH Client
+        run: sudo apt-get install -y openssh-client
+
+      - name: Set up AWS .pem File
+        run: echo "$AWS_PEM_FILE" | base64 --decode > mlops.pem && chmod 600 mlops.pem
+
+      - name: SSH into EC2 Instance
         env:
-            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            HOSTNAME: ${{vars.ML_PIPELINE_INSTANCE_IP}}
-            USER_NAME: ${{vars.INSTANCE_USER}}
-      
+          INSTANCE_IP: <YOUR_EC2_INSTANCE_IP>
+          INSTANCE_USER: <YOUR_EC2_INSTANCE_USERNAME>
         run: |
-            echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
+          ssh -o StrictHostKeyChecking=no -i mlops.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
