@@ -7,24 +7,30 @@ on:
 
 jobs:
   ssh-into-ec2:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Install SSH Client
-        run: sudo apt-get install -y openssh-client
-
-      - name: Create SSH Directory
-        run: mkdir -p ~/.ssh
+        run: |
+          choco install -y openssh
 
       - name: Copy .pem File
-        run: cp C:\Users\Jia Sheng\aws\github.pem ~/.ssh/github.pem && chmod 600 ~/.ssh/github.pem
-        
+        run: |
+          mkdir C:\Users\runner\.ssh
+          copy C:\Users\Jia Sheng\aws\github.pem C:\Users\runner\.ssh\github.pem
+          icacls C:\Users\runner\.ssh\github.pem /inheritance:r
+          icacls C:\Users\runner\.ssh\github.pem /grant:r "NT AUTHORITY\SYSTEM:(F)"
+          icacls C:\Users\runner\.ssh\github.pem /grant:r "BUILTIN\Administrators:(F)"
+          icacls C:\Users\runner\.ssh\github.pem /grant:r "BUILTIN\Users:(R)"
+          icacls C:\Users\runner\.ssh\github.pem /grant:r "BUILTIN\Users:(F)"
+          attrib +R C:\Users\runner\.ssh\github.pem
+
       - name: SSH into EC2 Instance
         env:
           INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
           INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/github.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
+          ssh -o StrictHostKeyChecking=no -i C:\Users\runner\.ssh\github.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
