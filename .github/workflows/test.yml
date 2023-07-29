@@ -1,4 +1,4 @@
-name: SSH into EC2 Instance
+name: SSH into EC2 Instance with github action
 
 on:
   push:
