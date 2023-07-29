@@ -2,19 +2,21 @@ name: Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   Deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v2 
+      - uses: actions/checkout@v2
       - name: Build & Deploy
         env:
-          HOSTNAME: ${{ vars.ML_PIPELINE_INSTANCE_IP }}
-          USER_NAME: ${{ vars.INSTANCE_USER }}
-      
+          HOSTNAME: ${{ secrets.ML_PIPELINE_INSTANCE_IP }}
+          USER_NAME: ${{ secrets.INSTANCE_USER }}
+
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${USER_NAME}@${HOSTNAME}
+
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "echo 'Hello, EC2!'"
+
