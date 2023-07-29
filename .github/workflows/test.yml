@@ -23,7 +23,7 @@ jobs:
 
       - name: Copy .pem File
         run: |
-          Copy-Item -Path "C:\Users\Jia Sheng\aws\github.pem" -Destination "C:\Users\runner\.ssh\github.pem"
+          Copy-Item -Path "$env:USERPROFILE\aws\github.pem" -Destination "C:\Users\runner\.ssh\github.pem"
           icacls "C:\Users\runner\.ssh\github.pem" /inheritance:r
           icacls "C:\Users\runner\.ssh\github.pem" /grant:r "NT AUTHORITY\SYSTEM:(F)"
           icacls "C:\Users\runner\.ssh\github.pem" /grant:r "BUILTIN\Administrators:(F)"
