@@ -21,7 +21,7 @@ jobs:
 
       - name: SSH into EC2 Instance
         env:
-          INSTANCE_IP: <YOUR_EC2_INSTANCE_IP>
-          INSTANCE_USER: <YOUR_EC2_INSTANCE_USERNAME>
+          INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
+          INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
         run: |
           ssh -o StrictHostKeyChecking=no -i mlops.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
