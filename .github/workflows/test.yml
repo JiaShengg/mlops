@@ -1,33 +1,28 @@
+name: build and push image to aws ecr
+on:
+  push: 
+    branches: [ main ]
+jobs:
+  build-and-push:
+    name: Build and push to ecr
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-This is my github actions flow:
-
-  ---
-  name: build and push image to aws ecr
-  on:
-    push: 
-      branches: [ main ]
-  jobs:
-    build-and-push:
-      name: Build and push to ecr
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      ...
-  
-    deploy:
-      needs: build-and-push
-      name: deploy
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Login ec2
-          env:
-            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            HOSTNAME: ${{ secrets.ML_PIPELINE_INSTANCE_IP }}
-            USER_NAME: ${{ secrets.INSTANCE_USER }}
-          run: |
-            echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
-            ls
-            touch helloworld.txt
+  deploy:
+    needs: build-and-push
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login ec2
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{ secrets.ML_PIPELINE_INSTANCE_IP }}
+          USER_NAME: ${{ secrets.INSTANCE_USER }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}
+          ls
+          touch helloworld.txt
