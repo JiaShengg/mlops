@@ -17,11 +17,11 @@ jobs:
         run: sudo apt-get install -y openssh-client
 
       - name: Set up AWS .pem File
-        run: echo "$AWS_PEM_FILE" | base64 --decode > mlops.pem && chmod 600 mlops.pem
+        run: echo "$AWS_PEM_FILE" | base64 --decode > github.pem && chmod 600 github.pem
 
       - name: SSH into EC2 Instance
         env:
           INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
           INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
         run: |
-          ssh -o StrictHostKeyChecking=no -i mlops.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
+          ssh -o StrictHostKeyChecking=no -i github.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
