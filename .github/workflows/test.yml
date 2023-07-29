@@ -2,21 +2,21 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   Deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2 
       - name: Build & Deploy
         env:
-          HOSTNAME: ${{ secrets.ML_PIPELINE_INSTANCE_IP }}
-          USER_NAME: ${{ secrets.INSTANCE_USER }}
-
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{ vars.ML_PIPELINE_INSTANCE_IP }}
+          USER_NAME: ${{ vars.INSTANCE_USER }}
+      
         run: |
-
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "echo 'Hello, EC2!'"
-
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "touch github.txt"
