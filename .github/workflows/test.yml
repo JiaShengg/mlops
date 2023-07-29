@@ -17,20 +17,23 @@ jobs:
         run: |
           choco install -y openssh
 
-      - name: Copy .pem File
+      - name: Create SSH Directory
         run: |
           mkdir C:\Users\runner\.ssh
-          copy C:\Users\Jia Sheng\aws\github.pem C:\Users\runner\.ssh\github.pem
-          icacls C:\Users\runner\.ssh\github.pem /inheritance:r
-          icacls C:\Users\runner\.ssh\github.pem /grant:r "NT AUTHORITY\SYSTEM:(F)"
-          icacls C:\Users\runner\.ssh\github.pem /grant:r "BUILTIN\Administrators:(F)"
-          icacls C:\Users\runner\.ssh\github.pem /grant:r "BUILTIN\Users:(R)"
-          icacls C:\Users\runner\.ssh\github.pem /grant:r "BUILTIN\Users:(F)"
-          attrib +R C:\Users\runner\.ssh\github.pem
+
+      - name: Copy .pem File
+        run: |
+          Copy-Item -Path "C:\Users\Jia Sheng\aws\github.pem" -Destination "C:\Users\runner\.ssh\github.pem"
+          icacls "C:\Users\runner\.ssh\github.pem" /inheritance:r
+          icacls "C:\Users\runner\.ssh\github.pem" /grant:r "NT AUTHORITY\SYSTEM:(F)"
+          icacls "C:\Users\runner\.ssh\github.pem" /grant:r "BUILTIN\Administrators:(F)"
+          icacls "C:\Users\runner\.ssh\github.pem" /grant:r "BUILTIN\Users:(R)"
+          icacls "C:\Users\runner\.ssh\github.pem" /grant:r "BUILTIN\Users:(F)"
+          attrib +R "C:\Users\runner\.ssh\github.pem"
 
       - name: SSH into EC2 Instance
         env:
           INSTANCE_IP: '${{ vars.ML_PIPELINE_INSTANCE_IP }}'
           INSTANCE_USER: '${{ vars.INSTANCE_USER }}'
         run: |
-          ssh -o StrictHostKeyChecking=no -i C:\Users\runner\.ssh\github.pem ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
+          ssh -o StrictHostKeyChecking=no -i "C:\Users\runner\.ssh\github.pem" ${INSTANCE_USER}@${INSTANCE_IP} 'your_remote_command'
